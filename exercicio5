@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void bubbleSort(char **array, int size) {
+    int swapped;
+    char *temp;
+    
+    do {
+        swapped = 0;
+        for (int i = 0; i < size - 1; i++) {
+            if (strcmp(array[i], array[i+1]) > 0) {
+                // Swap the two words
+                temp = array[i];
+                array[i] = array[i+1];
+                array[i+1] = temp;
+                swapped = 1;
+            }
+        }
+    } while (swapped);
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Uso correto: %s arquivo_de_entrada.txt\n", argv[0]);
+        return 1;
+    }
+
+    // Abrir o arquivo de entrada
+    FILE *inputFile = fopen(argv[1], "r");
+    if (!inputFile) {
+        perror("Erro ao abrir o arquivo de entrada");
+        return 1;
+    }
+
+    // Ler as palavras do arquivo e armazená-las em um array dinâmico
+    char *word;
+    char **words = NULL;
+    int wordCount = 0;
+    
+    while (fscanf(inputFile, "%ms", &word) != EOF) {
+        words = (char **)realloc(words, (wordCount + 1) * sizeof(char *));
+        words[wordCount] = word;
+        wordCount++;
+    }
+    
+    fclose(inputFile);
+
+    // Ordenar as palavras usando o Bubble Sort
+    bubbleSort(words, wordCount);
+
+    // Criar e escrever o arquivo de saída
+    char outputFileName[256];
+    snprintf(outputFileName, sizeof(outputFileName), "%s_ordenado.txt", argv[1]);
+    FILE *outputFile = fopen(outputFileName, "w");
+    if (!outputFile) {
+        perror("Erro ao criar o arquivo de saída");
+        return 1;
+    }
+
+    for (int i = 0; i < wordCount; i++) {
+        fprintf(outputFile, "%s\n", words[i]);
+        free(words[i]);
+    }
+
+    fclose(outputFile);
+    free(words);
+
+    printf("Palavras ordenadas com sucesso no arquivo %s\n", outputFileName);
+
+    return 0;
+}
